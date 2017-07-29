@@ -25,16 +25,8 @@ public class MainActivity extends AppCompatActivity {
     int mTimerSec = 0;
     //Handler mHandler = new Handler();
 
-    ContentResolver resolver = getContentResolver();
-    Cursor cursor = resolver.query(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            null,
-            null,
-            null,
-            null
-    );
 
-    Button mBackButtun;
+    Button mBackButton;
     Button mStopButton;
     Button mForwardButton;
 
@@ -42,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         // Android 6.0以降の場合
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -59,33 +53,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        mBackButtun = (Button)findViewById(R.id.back_button);
-        mStopButton = (Button)findViewById(R.id.startStop_button);
-        mForwardButton = (Button)findViewById(R.id.forward_button);
 
-        mBackButtun.setOnClickListener(new View.OnClickListener(){//押したときの処理
+
+
+
+
+        mBackButton.setOnClickListener(new View.OnClickListener(){//押したときの処理
             @Override
            public void onClick(View v){//もし最初だったら一番後ろに戻る//最初ではなかったら前に戻る
                 if (cursor.moveToPrevious() == true){
-                    if (cursor.moveToPrevious()) {
-                        int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                        Long id = cursor.getLong(fieldIndex);
-                        Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                        ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                        imageVIew.setImageURI(imageUri);
-                    }
-                    cursor.close();
+                    previousContentsInfo();
                 }else{
-                    if (cursor.moveToLast()) {
-                        int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                        Long id = cursor.getLong(fieldIndex);
-                        Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                        ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                        imageVIew.setImageURI(imageUri);
-                    }
-                    cursor.close();
+                    backContentsInfo();
                 }
             }
         });
@@ -101,15 +80,7 @@ public class MainActivity extends AppCompatActivity {
                         public void run(){
                             mTimerSec +=1;
                             //ここで次の写真に移動させる
-                            if (cursor.moveToNext()) {
-                                int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                                Long id = cursor.getLong(fieldIndex);
-                                Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                                ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                                imageVIew.setImageURI(imageUri);
-                                }
-                                cursor.close();
+                            nextContentsInfo();
                         }
                     },2000,2000);
                 }else if(mTimer != null) {//動いてたら止める//再生中はstop
@@ -124,25 +95,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){//もし一番後ろだったら最初に進む//それ以外は後に進む
                 if (cursor.moveToNext() == true){
-                    if (cursor.moveToNext()) {
-                        int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                        Long id = cursor.getLong(fieldIndex);
-                        Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                        ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                        imageVIew.setImageURI(imageUri);
-                    }
-                    cursor.close();
+                    nextContentsInfo();
                 }else{
-                    if (cursor.moveToFirst()) {
-                        int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                        Long id = cursor.getLong(fieldIndex);
-                        Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                        ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                        imageVIew.setImageURI(imageUri);
-                    }
-                    cursor.close();
+                    firstContentsInfo();
                 }
             }
         });
@@ -161,19 +116,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    ContentResolver resolver = getContentResolver();
+    Cursor cursor = resolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            null,
+            null,
+            null,
+            null
+    );
 
     //情報を取得
     private void getContentsInfo() {
 
         // 画像の情報を取得する
-        ContentResolver resolver = getContentResolver();
-        Cursor cursor = resolver.query(
+        //ContentResolver resolver = getContentResolver();
+        /*Cursor cursor = resolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
                 null, // 項目(null = 全項目)
                 null, // フィルタ条件(null = フィルタなし)
                 null, // フィルタ用パラメータ
                 null // ソート (null ソートなし)
-        );
+        );*/
 
         if (cursor.moveToFirst()) {
             int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
@@ -183,6 +146,57 @@ public class MainActivity extends AppCompatActivity {
             ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
             imageVIew.setImageURI(imageUri);
         }
+    }
+    private void nextContentsInfo(){
+        if (cursor.moveToNext()) {
+            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+            Long id = cursor.getLong(fieldIndex);
+            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+            imageVIew.setImageURI(imageUri);
+        }
+    }
+    private void previousContentsInfo(){
+        if (cursor.moveToPrevious()) {
+            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+            Long id = cursor.getLong(fieldIndex);
+            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+            imageVIew.setImageURI(imageUri);
+        }
+    }
+    private void backContentsInfo(){
+        if (cursor.moveToLast()) {
+            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+            Long id = cursor.getLong(fieldIndex);
+            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+            imageVIew.setImageURI(imageUri);
+        }
+    }
+    private void firstContentsInfo(){
+        if (cursor.moveToFirst()) {
+            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+            Long id = cursor.getLong(fieldIndex);
+            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+            imageVIew.setImageURI(imageUri);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        cursor.close();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         cursor.close();
     }
 }
