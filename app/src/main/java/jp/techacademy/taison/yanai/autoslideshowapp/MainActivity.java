@@ -17,6 +17,9 @@ import android.widget.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+
+
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ContentResolver resolver = getContentResolver();
-        Cursor cursor = resolver.query(
+        final Cursor cursor = resolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
                 null, // 項目(null = 全項目)
                 null, // フィルタ条件(null = フィルタなし)
@@ -62,6 +65,10 @@ public class MainActivity extends AppCompatActivity {
                 null // ソート (null ソートなし)
         );
 
+
+        mBackButton = (Button) findViewById(R.id.back_button);
+        mStopButton = (Button) findViewById(R.id.startStop_button);
+        mForwardButton = (Button) findViewById(R.id.forward_button);
 
 
 
@@ -104,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         mForwardButton.setOnClickListener(new View.OnClickListener(){//押したときの処理
             @Override
             public void onClick(View v){//もし一番後ろだったら最初に進む//それ以外は後に進む
-                if (cursor.moveToNext() == true){
+                if (cursor.moveToNext()){
                     nextContentsInfo();
                 }else{
                     firstContentsInfo();
@@ -158,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
             imageVIew.setImageURI(imageUri);
         }
     }*/
+
     private void nextContentsInfo(){
         if (cursor.moveToNext()) {
             int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
