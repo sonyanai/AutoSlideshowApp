@@ -23,8 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     Timer mTimer;
     int mTimerSec = 0;
-    //Handler mHandler = new Handler();
-
 
     Button mBackButton;
     Button mStopButton;
@@ -37,20 +35,32 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
         // Android 6.0以降の場合
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // パーミッションの許可状態を確認する
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 // 許可されている
-                getContentsInfo();
+                //getContentsInfo();
+                firstContentsInfo();
             } else {
                 // 許可されていないので許可ダイアログを表示する
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
             }
             // Android 5系以下の場合
         } else {
-            getContentsInfo();
+            //getContentsInfo();
+            firstContentsInfo();
         }
+
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = resolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
+                null, // 項目(null = 全項目)
+                null, // フィルタ条件(null = フィルタなし)
+                null, // フィルタ用パラメータ
+                null // ソート (null ソートなし)
+        );
 
 
 
@@ -61,10 +71,10 @@ public class MainActivity extends AppCompatActivity {
         mBackButton.setOnClickListener(new View.OnClickListener(){//押したときの処理
             @Override
            public void onClick(View v){//もし最初だったら一番後ろに戻る//最初ではなかったら前に戻る
-                if (cursor.moveToPrevious() == true){
+                if (cursor.moveToPrevious()){
                     previousContentsInfo();
                 }else{
-                    backContentsInfo();
+                    lastContentsInfo();
                 }
             }
         });
@@ -108,7 +118,8 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getContentsInfo();
+                    //getContentsInfo();
+                    firstContentsInfo();
                 }
                 break;
             default:
@@ -126,17 +137,17 @@ public class MainActivity extends AppCompatActivity {
     );
 
     //情報を取得
-    private void getContentsInfo() {
+    /*private void getContentsInfo() {
 
         // 画像の情報を取得する
-        //ContentResolver resolver = getContentResolver();
-        /*Cursor cursor = resolver.query(
+        ContentResolver resolver = getContentResolver();
+        Cursor cursor = resolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // データの種類
                 null, // 項目(null = 全項目)
                 null, // フィルタ条件(null = フィルタなし)
                 null, // フィルタ用パラメータ
                 null // ソート (null ソートなし)
-        );*/
+        );
 
         if (cursor.moveToFirst()) {
             int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
             imageVIew.setImageURI(imageUri);
         }
-    }
+    }*/
     private void nextContentsInfo(){
         if (cursor.moveToNext()) {
             int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
@@ -167,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             imageVIew.setImageURI(imageUri);
         }
     }
-    private void backContentsInfo(){
+    private void lastContentsInfo(){
         if (cursor.moveToLast()) {
             int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
             Long id = cursor.getLong(fieldIndex);
