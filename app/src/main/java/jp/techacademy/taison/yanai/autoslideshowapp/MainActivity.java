@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -17,7 +18,6 @@ import android.widget.ImageView;
 
 import java.util.Timer;
 import java.util.TimerTask;
-
 
 
 
@@ -125,10 +125,12 @@ public class MainActivity extends AppCompatActivity {
             case PERMISSIONS_REQUEST_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     firstContentsInfo();
+                }else{
+                    mForwardButton.setEnabled(false);//trueで表示,falseで非表示
+                    mBackButton.setEnabled(false);
+                    mStopButton.setEnabled(false);
 
-
-
-
+                    mDialog();
 
 
 
@@ -136,7 +138,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             default:
-                break;
+                //requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
+                //break;
         }
     }
 
@@ -207,11 +210,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
+
+    private void mDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("再起動して許可してください");
+        builder.show();
+    }
+
+    /*@Override
     protected void onPause() {
         super.onPause();
-        cursor.close();
-    }
+        //cursor.close();
+    }*/
 
     @Override
     protected void onDestroy() {
